@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 """Defines the HBnB console."""
 import cmd
-from models import storage
-from models.base_model import BaseModel
 
 
 class HBNBCommand(cmd.Cmd):
@@ -13,6 +11,10 @@ class HBNBCommand(cmd.Cmd):
     """
 
     prompt = "(hbnb) "
+
+    def help_quit(self):
+        """Help message for quit command."""
+        print("Quit command to exit the program")
 
     def emptyline(self):
         """Do nothing upon receiving an empty line."""
