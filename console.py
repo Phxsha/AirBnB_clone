@@ -126,6 +126,30 @@ class HBNBCommand(cmd.Cmd):
         setattr(obj, args[2], args[3])
         obj.save()
 
+    def do_User_all(self, line):
+        """Prints all string representations of all instances of User"""
+        self.do_all("User " + line)
+
+    def do_State_all(self, line):
+        """Prints all string representations of all instances of State"""
+        self.do_all("State " + line)
+
+    def do_City_all(self, line):
+        """Prints all string representations of all instances of City"""
+        self.do_all("City " + line)
+
+    def do_Amenity_all(self, line):
+        """Prints all string representations of all instances of Amenity"""
+        self.do_all("Amenity " + line)
+
+    def do_Place_all(self, line):
+        """Prints all string representations of all instances of Place"""
+        self.do_all("Place " + line)
+
+    def do_Review_all(self, line):
+        """Prints all string representations of all instances of Review"""
+        self.do_all("Review " + line)
+
 
 if __name__ == "__main__":
     HBNBCommand().cmdloop()
