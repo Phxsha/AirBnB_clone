@@ -91,13 +91,14 @@ class HBNBCommand(cmd.Cmd):
     def do_all(self, line):
         """Prints all string representations of all instances or instances of a specific class"""
         args = shlex.split(line)
+        objs = storage.all()
         if len(args) == 0:
-            print([str(obj) for obj in storage.all().values()])
+            print([str(obj) for obj in objs.values()])
             return
         if args[0] not in self.__classes:
             print("** class doesn't exist **")
             return
-        print([str(obj) for obj in storage.all().values() if isinstance(obj, self.__classes[args[0]])])
+        print([str(obj) for obj in objs.values() if isinstance(obj, self.__classes[args[0]])])
 
     def do_update(self, line):
         """Updates an instance based on the class name and id"""
@@ -126,30 +127,16 @@ class HBNBCommand(cmd.Cmd):
         setattr(obj, args[2], args[3])
         obj.save()
 
-    def do_User_all(self, line):
-        """Prints all string representations of all instances of User"""
-        self.do_all("User " + line)
+    def dynamic_all_method(class_name):
+        """Dynamically generates a method for printing all instances of a class"""
+        def do_class_all(self, line):
+            """Prints all string representations of all instances of the specified class"""
+            self.do_all(f"{class_name} {line}")
+        return do_class_all
 
-    def do_State_all(self, line):
-        """Prints all string representations of all instances of State"""
-        self.do_all("State " + line)
-
-    def do_City_all(self, line):
-        """Prints all string representations of all instances of City"""
-        self.do_all("City " + line)
-
-    def do_Amenity_all(self, line):
-        """Prints all string representations of all instances of Amenity"""
-        self.do_all("Amenity " + line)
-
-    def do_Place_all(self, line):
-        """Prints all string representations of all instances of Place"""
-        self.do_all("Place " + line)
-
-    def do_Review_all(self, line):
-        """Prints all string representations of all instances of Review"""
-        self.do_all("Review " + line)
-
+    for class_name in __classes.keys():
+        method_name = f"do_{class_name.lower()}_all"
+        locals()[method_name] = dynamic_all_method(class_name)
 
 if __name__ == "__main__":
     HBNBCommand().cmdloop()
