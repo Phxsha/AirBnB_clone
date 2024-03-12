@@ -5,6 +5,11 @@ Defines the FileStorage class.
 import json
 from models.base_model import BaseModel
 from models.user import User
+from models.state import State
+from models.city import City
+from models.amenity import Amenity
+from models.place import Place
+from models.review import Review
 
 
 class FileStorage:
@@ -43,8 +48,20 @@ class FileStorage:
                     if cls_name == "User":
                         del obj["__class__"]
                         self.new(User(**obj))
-                    else:
+                    elif cls_name == "State":
                         del obj["__class__"]
-                        self.new(eval(cls_name)(**obj))
+                        self.new(State(**obj))
+                    elif cls_name == "City":
+                        del obj["__class__"]
+                        self.new(City(**obj))
+                    elif cls_name == "Amenity":
+                        del obj["__class__"]
+                        self.new(Amenity(**obj))
+                    elif cls_name == "Place":
+                        del obj["__class__"]
+                        self.new(Place(**obj))
+                    elif cls_name == "Review":
+                        del obj["__class__"]
+                        self.new(Review(**obj))
         except FileNotFoundError:
             return
