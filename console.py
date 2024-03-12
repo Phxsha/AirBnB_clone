@@ -1,143 +1,125 @@
 #!/usr/bin/python3
-"""Defines the HBnB console."""
+"""Module for the console of the AirBnB clone"""
 import cmd
-import shlex
 from models.base_model import BaseModel
-import models
+from models.user import User
+from models import storage
+import shlex
 
 
 class HBNBCommand(cmd.Cmd):
-    """Defines the HolbertonBnB command interpreter.
-
-    Attributes:
-        prompt (str): The command prompt.
-    """
-
+    """Class for the console of the AirBnB clone"""
     prompt = "(hbnb) "
+    __classes = {"BaseModel": BaseModel, "User": User}
 
     def help_quit(self):
         """Help message for quit command."""
         print("Quit command to exit the program")
 
+    def do_quit(self, line):
+        """Quit command to exit the program"""
+        return True
+
+    def do_EOF(self, line):
+        """EOF command to exit the program"""
+        print()
+        return True
+
     def emptyline(self):
-        """Do nothing upon receiving an empty line."""
+        """Called when an empty line is entered"""
         pass
 
-    def do_quit(self, arg):
-        """Quit command to exit the program."""
-        return True
-
-    def do_EOF(self, arg):
-        """EOF signal to exit the program."""
-        print("")
-        return True
-
-    def do_create(self, arg):
-        """Creates a new instance of BaseModel, saves it, and prints the id.
-
-        Ex: $ create BaseModel
-        """
-        if not arg:
+    def do_create(self, line):
+        """Create a new instance of BaseModel, save it, and print its id"""
+        args = shlex.split(line)
+        if len(args) == 0:
             print("** class name missing **")
             return
-        try:
-            obj = eval(arg)()
-            obj.save()
-            print(obj.id)
-        except NameError:
+        class_name = args[0]
+        if class_name not in self.__classes:
             print("** class doesn't exist **")
+            return
+        new_instance = self.__classes[class_name]()
+        new_instance.save()
+        print(new_instance.id)
 
-    def do_show(self, arg):
-        """Prints the string representation of an instance based on the
-        class name and id.
-
-        Ex: $ show BaseModel 1234-1234-1234.
-        """
-        if not arg:
+    def do_show(self, line):
+        """Prints the string representation of an instance based on the class name and id"""
+        args = shlex.split(line)
+        if len(args) == 0:
             print("** class name missing **")
             return
-        args = shlex.split(arg)
-        try:
-            cls_name = args[0]
-            obj_id = args[1]
-            obj_key = "{}.{}".format(cls_name, obj_id)
-            obj = models.storage.all().get(obj_key)
-            if obj:
-                print(obj)
-            else:
-                print("** no instance found **")
-        except IndexError:
-            print("** instance id missing **")
-
-    def do_destroy(self, arg):
-        """Deletes an instance based on the class name and id.
-
-        Ex: $ destroy BaseModel 1234-1234-1234.
-        """
-        if not arg:
-            print("** class name missing **")
-            return
-        args = shlex.split(arg)
-        try:
-            cls_name = args[0]
-            obj_id = args[1]
-            obj_key = "{}.{}".format(cls_name, obj_id)
-            objects = models.storage.all()
-            if obj_key in objects:
-                del objects[obj_key]
-                models.storage.save()
-            else:
-                print("** no instance found **")
-        except IndexError:
-            print("** instance id missing **")
-
-    def do_all(self, arg):
-        """Prints all string representation of all instances based or not on the
-        class name.
-
-        Ex: $ all BaseModel or $ all.
-        """
-        objects = models.storage.all()
-        if arg:
-            try:
-                obj_list = [str(v) for k, v in objects.items()
-                            if v.__class__.__name__ == arg]
-            except AttributeError:
-                print("** class doesn't exist **")
-                return
-        else:
-            obj_list = [str(v) for k, v in objects.items()]
-        print(obj_list)
-
-    def do_update(self, arg):
-        """Updates an instance based on the class name and id by adding or
-        updating attribute.
-
-        Ex: $ update BaseModel 1234-1234-1234 email "aibnb@mail.com".
-
-        Usage: update <class name> <id> <attribute name> "<attribute value>"
-        """
-        if not arg:
-            print("** class name missing **")
-            return
-        args = shlex.split(arg)
-        try:
-            cls_name = args[0]
-            obj_id = args[1]
-            attr_name = args[2]
-            attr_value = args[3]
-            obj_key = "{}.{}".format(cls_name, obj_id)
-            objects = models.storage.all()
-            if obj_key not in objects:
-                print("** no instance found **")
-                return
-            obj = objects[obj_key]
-            setattr(obj, attr_name, attr_value)
-            models.storage.save()
-        except IndexError:
-            print("** instance id missing **")
-        except AttributeError:
+        if args[0] not in self.__classes:
             print("** class doesn't exist **")
+            return
+        if len(args) < 2:
+            print("** instance id missing **")
+            return
+        objs = storage.all()
+        key = "{}.{}".format(args[0], args[1])
+        if key not in objs:
+            print("** no instance found **")
+            return
+        print(objs[key])
+
+    def do_destroy(self, line):
+        """Deletes an instance based on the class name and id"""
+        args = shlex.split(line)
+        if len(args) == 0:
+            print("** class name missing **")
+            return
+        if args[0] not in self.__classes:
+            print("** class doesn't exist **")
+            return
+        if len(args) < 2:
+            print("** instance id missing **")
+            return
+        objs = storage.all()
+        key = "{}.{}".format(args[0], args[1])
+        if key not in objs:
+            print("** no instance found **")
+            return
+        del objs[key]
+        storage.save()
+
+    def do_all(self, line):
+        """Prints all string representations of all instances"""
+        args = shlex.split(line)
+        objs = storage.all()
+        if len(args) == 0:
+            print([str(objs[key]) for key in objs])
+            return
+        if args[0] not in self.__classes:
+            print("** class doesn't exist **")
+            return
+        print([str(objs[key]) for key in objs if key.startswith(args[0])])
+
+    def do_update(self, line):
+        """Updates an instance based on the class name and id"""
+        args = shlex.split(line)
+        if len(args) == 0:
+            print("** class name missing **")
+            return
+        if args[0] not in self.__classes:
+            print("** class doesn't exist **")
+            return
+        if len(args) < 2:
+            print("** instance id missing **")
+            return
+        if len(args) < 3:
+            print("** attribute name missing **")
+            return
+        if len(args) < 4:
+            print("** value missing **")
+            return
+        objs = storage.all()
+        key = "{}.{}".format(args[0], args[1])
+        if key not in objs:
+            print("** no instance found **")
+            return
+        obj = objs[key]
+        setattr(obj, args[2], args[3])
+        obj.save()
 
 
 if __name__ == "__main__":
